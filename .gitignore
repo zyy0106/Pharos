@@ -32,6 +32,7 @@ corpus/models/
 # Tooling / temp files
 artifact-temp/
 .superpowers/
+docs/superpowers/
 .zcode/
 tmp/
 tmp-tectonic-*/
