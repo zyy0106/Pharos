@@ -12,7 +12,7 @@ class RunLockedError(RuntimeError):
 
 
 class RunLock:
-    def __init__(self, out: str | Path, *, filename: str = ".beacon-worker.lock"):
+    def __init__(self, out: str | Path, *, filename: str = ".pharos-worker.lock"):
         self.out = Path(out)
         self.path = self.out / filename
         self._handle: BinaryIO | None = None

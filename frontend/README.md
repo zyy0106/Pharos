@@ -1,6 +1,6 @@
-# automcm-pro Web UI
+# Pharos Web UI
 
-该目录包含 automcm-pro 的本地 Web 工作台与 Node.js API 服务：
+该目录包含 Pharos 的本地 Web 工作台与 Node.js API 服务：
 
 - `server.mjs`：提供健康检查、示例题、运行控制、日志流和产物读取接口；
 - `index.html`、`app.js`、`styles.css`：浏览器端界面；

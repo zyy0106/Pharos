@@ -687,7 +687,7 @@ def start(
     if force:
         args.append("--force")
     pid = start_detached_supervisor(out=out, supervise_args=args, cwd=Path.cwd())
-    typer.echo(f"automcm-pro supervisor 已在后台启动，PID={pid}")
+    typer.echo(f"Pharos supervisor 已在后台启动，PID={pid}")
     typer.echo(f"状态：uv run math-agent status --out {out} --thread {thread}")
     typer.echo(f"日志：{out / 'supervisor.log'}")
 

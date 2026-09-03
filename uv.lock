@@ -159,7 +159,7 @@ wheels = [
 ]
 
 [[package]]
-name = "automcm-pro"
+name = "pharos"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 echo ============================================
-echo   automcm-pro - Start (Windows)
+echo   Pharos - Start (Windows)
 echo ============================================
 echo.
 

@@ -591,7 +591,7 @@ async function handleApi(request, response, url) {
 
     const problemPath = resolve(runDir, "problem.json");
     const problem = {
-      title: body.title || "automcm-pro UI Problem",
+      title: body.title || "Pharos UI Problem",
       background: body.background || "",
       questions: String(body.background || "")
         .split(/\n+/)
@@ -773,7 +773,7 @@ createServer(async (request, response) => {
   const ragEnabled = env.MATH_AGENT_RAG_ENABLED === "1" ? "on" : "off";
   console.log("");
   console.log("  ╔══════════════════════════════════════════════╗");
-  console.log("  ║   automcm-pro — Web UI ready                ║");
+  console.log("  ║   Pharos — Web UI ready                ║");
   console.log("  ╠══════════════════════════════════════════════╣");
   console.log(`  ║   Frontend  → http://127.0.0.1:${String(port).padEnd(19)}║`);
   console.log(`  ║   LLM API   → ${apiBase.padEnd(27)}║`);

@@ -1,4 +1,4 @@
-"""Beacon 的统一 LLM 入口。
+"""Pharos 的统一 LLM 入口。
 
 业务节点只依赖 :func:`complete`。物理请求由可终止的 worker transport 执行；
 传输重试、结构化输出修复与退避共享同一个单调时钟 deadline。

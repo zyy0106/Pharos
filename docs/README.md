@@ -1,4 +1,4 @@
-# automcm-pro 文档索引与当前状态
+# Pharos 文档索引与当前状态
 
 最后核对：2026-07-28。
 
@@ -73,7 +73,7 @@ Web UI 首次访问按环境检查、服务商选择、密钥填写、模型验�
 - [`webui-simulation-findings-20260903.md`](webui-simulation-findings-20260903.md)：2026-09-03 WebUI 模拟复盘、已修复漏洞、未解决能力缺口和比赛前验收顺序。
 - [`paper-content-quality.md`](paper-content-quality.md)：论文证据、深度实验、离线应急评审、
   图文排布和篇幅门禁。
-- [`beacon-resilient-execution.md`](beacon-resilient-execution.md)：后台监督、恢复、硬期限和
+- [`pharos-resilient-execution.md`](pharos-resilient-execution.md)：后台监督、恢复、硬期限和
   最终原子收口。
 - [`huazhong-2026-a-quality-gap.md`](huazhong-2026-a-quality-gap.md)：当前真题结果、
   8 篇获奖论文对比和剩余差距。
@@ -84,7 +84,7 @@ Web UI 首次访问按环境检查、服务商选择、密钥填写、模型验�
 
 以下文件用于追溯，不是现行事实源：
 
-- [`beacon-full-pipeline-root-cause-20260717.md`](beacon-full-pipeline-root-cause-20260717.md)：
+- [`pharos-full-pipeline-root-cause-20260717.md`](pharos-full-pipeline-root-cause-20260717.md)：
   2026-07-17 完整调用链故障诊断和旧 v4 运行证据。
 - [`llm-timeout-retry-redesign.md`](llm-timeout-retry-redesign.md)：LLM transport、取消和预算机制
   的历史设计记录。

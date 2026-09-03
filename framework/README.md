@@ -1,6 +1,6 @@
 # Supervised Modeling Workbench
 
-这是一个独立于旧 Beacon 流程的单人类监督 WebUI。它把“提议者、决策者、Agent Supervisor、执行者、数学核验者、论文审查者、写作者、终结器”放在可持久化的 21 节点状态机中，并强制每个文件交接包经过：
+这是一个独立于旧 Pharos 流程的单人类监督 WebUI。它把“提议者、决策者、Agent Supervisor、执行者、数学核验者、论文审查者、写作者、终结器”放在可持久化的 21 节点状态机中，并强制每个文件交接包经过：
 
 ```text
 四文件提交 -> Supervisor -> 人类第一审 -> 人类第二审 -> approved 原子晋级 -> 下一 Agent

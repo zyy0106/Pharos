@@ -1182,7 +1182,7 @@ input[type="range"] {
 }
 
 .artifact-preview::after {
-  content: "AUTOMCM-PRO / PAPER";
+  content: "PHAROS / PAPER";
   position: absolute;
   right: 22px;
   bottom: 17px;

@@ -68,7 +68,7 @@ test("健康接口与静态首页可访问", async () => {
   const index = await fetch(`${base}/`);
   assert.equal(index.status, 200);
   const html = await index.text();
-  assert.match(html, /automcm-pro/);
+  assert.match(html, /Pharos/);
   assert.match(html, /三步开始你的数学建模任务/);
   assert.match(html, /id="runPipeline" disabled/);
   assert.match(html, /<details class="advanced-disclosure">/);

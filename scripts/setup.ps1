@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
 
-Write-Host "== AutoMCM-Pro setup ==" -ForegroundColor Cyan
+Write-Host "== Pharos setup ==" -ForegroundColor Cyan
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   throw "未找到 Node.js。请安装 Node.js 18+：https://nodejs.org/"

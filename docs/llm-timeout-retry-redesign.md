@@ -1,6 +1,6 @@
 # LLM Timeout、取消与重试机制重构方案
 
-> 历史设计记录。主要机制已经落地；现行参数以 `.env.example`、`src/math_agent/llm.py` 和 [`beacon-resilient-execution.md`](beacon-resilient-execution.md) 为准。
+> 历史设计记录。主要机制已经落地；现行参数以 `.env.example`、`src/math_agent/llm.py` 和 [`pharos-resilient-execution.md`](pharos-resilient-execution.md) 为准。
 
 ## 1. 背景与结论
 
@@ -42,7 +42,7 @@
 - 不在本次重构中更换 LiteLLM 或 router。
 - 不通过无限增大 timeout 掩盖慢模型问题。
 - 不自动并行发送相同 prompt 进行竞速。
-- 不承诺远端 provider 一定停止计费或立即停止生成。Beacon 能保证的是：deadline 到达后
+- 不承诺远端 provider 一定停止计费或立即停止生成。Pharos 能保证的是：deadline 到达后
   本地 LiteLLM 工作进程和连接被终止、调用方及时恢复、不会残留本地请求执行体。远端是否
   在 TCP 断开后停止计算取决于 router/provider，因此 timeout 默认不自动重试。
 - 不改变结构化 JSON/LaTeX 修复算法本身，只改变其预算和重试编排方式。
@@ -256,11 +256,11 @@ LLMError
 
 ### 6.3 LiteLLM 内部重试
 
-Beacon 必须作为唯一重试编排者，避免 LiteLLM、router 和 Beacon 三层重试相乘：
+Pharos 必须作为唯一重试编排者，避免 LiteLLM、router 和 Pharos 三层重试相乘：
 
 - LiteLLM client 侧重试设置为 0。
-- Beacon 根据错误分类执行上述策略。
-- router 是否重试属于部署配置，必须在运行文档中明确；若 router 已重试，Beacon 对 5xx/429
+- Pharos 根据错误分类执行上述策略。
+- router 是否重试属于部署配置，必须在运行文档中明确；若 router 已重试，Pharos 对 5xx/429
   的尝试次数应进一步降低。
 
 ### 6.4 JSON 修复与传输重试分离
@@ -608,7 +608,7 @@ npm test
 3. 通过 `standard / long / vision` 画像表达节点差异，不让秒数散落在节点中。
 4. 使用单一总 deadline 管理传输、退避和 JSON 修复。
 5. timeout 默认不自动重试；连接失败、429 和部分 5xx 按类别有限重试。
-6. Beacon 是唯一 client 侧重试编排者，关闭 LiteLLM 内部重试。
+6. Pharos 是唯一 client 侧重试编排者，关闭 LiteLLM 内部重试。
 7. 每个物理尝试都进入 trace，成功和失败同样可见。
 8. timeout 只能保证本地 worker 和连接被终止，不能保证远端停止计费；因此默认不自动重试。
 

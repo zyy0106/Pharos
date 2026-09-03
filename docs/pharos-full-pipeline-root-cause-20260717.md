@@ -1,4 +1,4 @@
-# Beacon 真实数学建模全流程故障根因、修复与验收报告
+# Pharos 真实数学建模全流程故障根因、修复与验收报告
 
 日期：2026-07-17  
 真实题目：用户本地上传的城市绿色物流配送题目  
@@ -12,7 +12,7 @@
 本次故障不是 Ollama 单点故障，也不是把某个 timeout 调大即可解决。真实原因是多个边界问题在长链路、连续节点和代码生成负载下叠加：
 
 1. 上游确实会返回 502、429、断连或不返回；旧实现又把不可取消的 SDK 调用留在主进程中，导致“请求已经超时，但执行线程仍在后台占用连接和内存”。
-2. 9router 能在账号间 fallback，但上游连接失败、单账号限流和并发配额仍会暴露给客户端；Beacon 的几十次连续长请求把单次低概率故障放大成流程级高概率故障。
+2. 9router 能在账号间 fallback，但上游连接失败、单账号限流和并发配额仍会暴露给客户端；Pharos 的几十次连续长请求把单次低概率故障放大成流程级高概率故障。
 3. 监督状态是持久化快照，不等同于活进程；旧状态没有同时校验 PID 身份、创建时刻、心跳和已验证完成标记。
 4. coder 旧重试只传 stderr，不传上一版代码、错误类型和真实附件 schema，导致每轮从零生成，重复引入字段、路径、时间和索引错误。
 5. 原城市物流脚本把订单按客户聚合，却不拆分超过单车容量的客户；当一轮没有可服务客户时，外层集合不减少，形成无进展循环。
@@ -81,14 +81,14 @@ CLI 直接运行从 `src/math_agent/cli.py:327` 进入相同链路；Web UI 没�
 
 9router 代码证据：`chunks/112.js:1` 模块 `79489` 会选择 provider credential，失败后调用 `shouldFallback`，若允许则把 connection 加入已尝试集合并换下一个账号；所有账号 rate limited 时返回上次错误与 retry-after。它能做账号级容错，但不能保证所有上游都健康，也不能消除外部并发配额。
 
-Beacon 旧根因：SDK 调用和主图执行处在同一长寿命进程中，Python 线程无法可靠中止底层阻塞网络调用；超时后重复调用会叠加“幽灵请求”。同时旧重试没有统一总预算，节点级重试、SDK 重试和 router fallback 可能相乘。
+Pharos 旧根因：SDK 调用和主图执行处在同一长寿命进程中，Python 线程无法可靠中止底层阻塞网络调用；超时后重复调用会叠加“幽灵请求”。同时旧重试没有统一总预算，节点级重试、SDK 重试和 router fallback 可能相乘。
 
 修复：
 
 - `src/math_agent/llm.py:303-401` 为每个逻辑调用设置 profile 级单次期限和总硬期限；总预算包含退避等待，预算不足时不再发新请求。
 - timeout 不自动在 fallback 模型重放，避免上游仍执行时产生重复长请求；明确 5xx、429、断连、timeout 的分类。
 - `src/math_agent/transport.py:219-274` 把 LiteLLM 放到 spawn worker；父进程 `poll(timeout)`，超时后 close → terminate → kill → join，下一次惰性启动新 worker。
-- `src/math_agent/llm_worker.py:61` 把 SDK 自身 retry 设为 0，防止隐藏重试与 Beacon 总预算相乘。
+- `src/math_agent/llm_worker.py:61` 把 SDK 自身 retry 设为 0，防止隐藏重试与 Pharos 总预算相乘。
 - `src/math_agent/llm.py` 把模型失败计数和 wall-clock 冷却期限原子写入当前 run 的 `llm_model_health.json`；supervisor 从 checkpoint 启动新 worker 后先加载该状态，把仍在冷却的模型移到候选末尾。旧版仅用进程内字典，恢复 worker 会遗忘熔断并再次命中同一挂起模型，这是 v4 初次 blocked 暴露出的最后一个 transport 根因。
 - supervisor 只对可恢复故障在同一 checkpoint 恢复，并有同节点失败上限；不会通过无限重试掩盖持续故障。
 

@@ -23,7 +23,7 @@ def _parse_model_list(value: str) -> tuple[str, ...]:
 
 
 # 9router 的连接回退只覆盖“同一 provider/model 下的多个连接”。当整个上游模型
-# 返回 5xx、连接失败或超时时，Beacon 还需要像 Codex/Claude CLI 一样切换模型，
+# 返回 5xx、连接失败或超时时，Pharos 还需要像 Codex/Claude CLI 一样切换模型，
 # 同时保留节点 checkpoint。留空即关闭跨模型故障转移。
 LLM_FALLBACK_MODELS = _parse_model_list(
     os.getenv("MATH_AGENT_LLM_FALLBACK_MODELS", "")

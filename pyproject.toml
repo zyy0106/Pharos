@@ -1,7 +1,7 @@
 [project]
-name = "automcm-pro"
+name = "pharos"
 version = "0.1.0"
-description = "automcm-pro multi-agent system for math modeling competition papers"
+description = "Pharos multi-agent system for math modeling competition papers"
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "langgraph>=0.2.0",

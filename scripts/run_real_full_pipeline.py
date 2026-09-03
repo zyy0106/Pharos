@@ -41,7 +41,7 @@ def _logged_wrap(fn, name):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="运行可恢复的 automcm-pro 真实完整流程")
+    parser = argparse.ArgumentParser(description="运行可恢复的 Pharos 真实完整流程")
     parser.add_argument("--out", type=Path, default=Path("runs/real_full"))
     parser.add_argument("--thread", default="real-full")
     args = parser.parse_args()

@@ -1,4 +1,4 @@
-# automcm-pro 项目协作规则
+# Pharos 项目协作规则
 
 ## 沟通与文档
 

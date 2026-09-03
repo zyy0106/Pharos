@@ -1,8 +1,8 @@
 <p align="center">
-  <strong>automcm-pro</strong>
+  <strong>Pharos</strong>
 </p>
 
-<h1 align="center">automcm-pro</h1>
+<h1 align="center">Pharos</h1>
 <h3 align="center">Lighting the path for every math modeling student.</h3>
 
 <p align="center">
@@ -24,9 +24,9 @@
 
 ---
 
-## What is automcm-pro?
+## What is Pharos?
 
-automcm-pro is an **end-to-end math modeling automation system** built for students competing in MCM/ICM, GMCM (China Graduate Mathematical Contest in Modeling), and similar contests. Given a competition problem, it orchestrates a multi-agent LangGraph pipeline to analyze the problem, build models, write and execute code, generate figures, produce a complete paper, and compile it to PDF — all with **human-in-the-loop review** at key checkpoints.
+Pharos is an **end-to-end math modeling automation system** built for students competing in MCM/ICM, GMCM (China Graduate Mathematical Contest in Modeling), and similar contests. Given a competition problem, it orchestrates a multi-agent LangGraph pipeline to analyze the problem, build models, write and execute code, generate figures, produce a complete paper, and compile it to PDF — all with **human-in-the-loop review** at key checkpoints.
 
 > **定位**：把原始赛题转化为可审计的模型、实验、图表和论文。
 
@@ -46,7 +46,7 @@ automcm-pro is an **end-to-end math modeling automation system** built for stude
 ```bash
 # Clone
 git clone <your-repository-url>
-cd automcm-pro
+cd Pharos
 
 # Install dependencies and create a local .env
 powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1
@@ -64,7 +64,7 @@ For the legacy/full LangGraph WebUI, use `npm start` after setup.
 
 ## How It Works
 
-automcm-pro 使用 **LangGraph** 编排 14 个用户可见阶段（另含内部阶段切换节点）：
+Pharos 使用 **LangGraph** 编排 14 个用户可见阶段（另含内部阶段切换节点）：
 
 ```mermaid
 graph LR
@@ -113,7 +113,7 @@ graph LR
 
 ## Web UI
 
-automcm-pro ships with a complete browser-based workspace:
+Pharos ships with a complete browser-based workspace:
 
 <p align="center">
   <em>Dashboard with pipeline progress, real-time logs, artifact preview, and parameter controls</em>
@@ -177,7 +177,7 @@ uv run math-agent bench --out runs/bench
 ## Project Structure
 
 ```
-automcm-pro/
+Pharos/
 ├── frontend/                   # Web UI
 │   ├── assets/
 │   │   └── (brand mark rendered in UI)
@@ -353,21 +353,21 @@ npm test
 ## FAQ
 
 <details>
-<summary><strong>What contests does automcm-pro support?</strong></summary>
+<summary><strong>What contests does Pharos support?</strong></summary>
 
-automcm-pro is designed for MCM/ICM and GMCM (中国研究生数学建模竞赛). The default template targets standard English-language papers. The `--template gmcm` flag enables the `gmcmthesis` document class with Chinese-language support, school/team/member fields, and the required cover page format.
+Pharos is designed for MCM/ICM and GMCM (中国研究生数学建模竞赛). The default template targets standard English-language papers. The `--template gmcm` flag enables the `gmcmthesis` document class with Chinese-language support, school/team/member fields, and the required cover page format.
 </details>
 
 <details>
 <summary><strong>Can I use any LLM provider?</strong></summary>
 
-Yes. automcm-pro uses LiteLLM under the hood, which supports 100+ providers. Any OpenAI-compatible endpoint works. Configure `OPENAI_API_BASE` and `OPENAI_API_KEY` in `.env`. Model names use the `provider/model` format (e.g., `openai/gpt-4o`, `ollama/llama3`).
+Yes. Pharos uses LiteLLM under the hood, which supports 100+ providers. Any OpenAI-compatible endpoint works. Configure `OPENAI_API_BASE` and `OPENAI_API_KEY` in `.env`. Model names use the `provider/model` format (e.g., `openai/gpt-4o`, `ollama/llama3`).
 </details>
 
 <details>
 <summary><strong>What happens if the LLM returns poorly formatted JSON?</strong></summary>
 
-automcm-pro's `complete()` function applies multiple repair strategies: stripping thinking tags (`<think>` blocks), extracting JSON from markdown code fences, escaping illegal backslash sequences in LaTeX math, and retrying with the previous response + error as context. If all retries exhaust, a typed `LLMError` is raised with a saved checkpoint so you can resume.
+Pharos's `complete()` function applies multiple repair strategies: stripping thinking tags (`<think>` blocks), extracting JSON from markdown code fences, escaping illegal backslash sequences in LaTeX math, and retrying with the previous response + error as context. If all retries exhaust, a typed `LLMError` is raised with a saved checkpoint so you can resume.
 </details>
 
 <details>
@@ -390,7 +390,7 @@ The `recover` command restarts from the last saved LangGraph checkpoint. The `re
 <details>
 <summary><strong>Do I need XeLaTeX installed?</strong></summary>
 
-XeLaTeX produces the highest-quality PDF output. If it is unavailable, automcm-pro preserves `paper.md` and `paper.tex`, but the finalizer reports the run as `degraded`; only a successfully compiled and verified PDF can produce an unqualified `completed` result.
+XeLaTeX produces the highest-quality PDF output. If it is unavailable, Pharos preserves `paper.md` and `paper.tex`, but the finalizer reports the run as `degraded`; only a successfully compiled and verified PDF can produce an unqualified `completed` result.
 </details>
 
 ---
@@ -398,12 +398,12 @@ XeLaTeX produces the highest-quality PDF output. If it is unavailable, automcm-p
 ## Community
 
 <p align="center">
-  <strong>automcm-pro 技术交流群</strong><br />
+  <strong>Pharos 技术交流群</strong><br />
   <sub>QQ 扫码加入，交流数学建模、论文写作与 Agent 技术</sub>
 </p>
 
 <p align="center">
-  <img src="frontend/assets/qq-group-qrcode.jpg" alt="automcm-pro QQ Group" width="240" />
+  <img src="frontend/assets/qq-group-qrcode.jpg" alt="Pharos QQ Group" width="240" />
 </p>
 
 ---

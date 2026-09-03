@@ -1,6 +1,6 @@
-# automcm-pro 使用与原理
+# Pharos 使用与原理
 
-本文是当前实现的快速上手说明，面向第一次运行项目的操作者。历史文档中的 Beacon 仅作为历史名称保留，不代表当前产品名。
+本文是当前实现的快速上手说明，面向第一次运行项目的操作者。历史文档中的 Pharos 仅作为历史名称保留，不代表当前产品名。
 
 ## 一、工作流程图
 
@@ -54,7 +54,7 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     actor H as 操作者
-    participant UI as automcm-pro Web UI
+    participant UI as Pharos Web UI
     participant R as 运行监管器
     participant P as 建模流水线
     H->>UI: 启动并完成首次配置

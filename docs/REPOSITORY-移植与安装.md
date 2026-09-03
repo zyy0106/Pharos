@@ -1,4 +1,4 @@
-# AutoMCM-Pro 仓库移植与安装说明
+# Pharos 仓库移植与安装说明
 
 本仓库包含两套入口：
 
@@ -18,7 +18,7 @@
 
    ```powershell
    git clone <你的GitHub仓库地址>
-   cd AutoMCM-Pro
+   cd Pharos
    ```
 
 3. 执行一次安装：
@@ -43,7 +43,7 @@
 
 ```bash
 git clone <你的GitHub仓库地址>
-cd AutoMCM-Pro
+cd Pharos
 bash scripts/setup.sh
 npm run start:framework
 ```
@@ -73,7 +73,7 @@ uv run math-agent supervise --help
 ```bash
 git init
 git add .
-git commit -m "Prepare portable AutoMCM-Pro repository"
+git commit -m "Prepare portable Pharos repository"
 git branch -M main
 git remote add origin https://github.com/<用户名>/<仓库名>.git
 git push -u origin main

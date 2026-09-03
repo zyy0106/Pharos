@@ -1,10 +1,10 @@
-# Beacon 长流程可靠执行说明
+# Pharos 长流程可靠执行说明
 
 > 现行运行说明。当前验收状态与已知产物缺口见 [`README.md`](README.md)。
 
 ## 已解决的问题
 
-Beacon 的生产图现在把昂贵阶段拆成可恢复工作项：
+Pharos 的生产图现在把昂贵阶段拆成可恢复工作项：
 
 - final 模型草稿、六个推导步骤和一致性检查分别保存 checkpoint；
 - 每个绘图/基线代码任务分成“生成代码”和“执行代码”，模型响应会在执行前保存；
@@ -75,12 +75,12 @@ $env:MATH_AGENT_OFFLINE_REVIEW='1'
 离线审查重新核对上游评分、主方案、独立基线、敏感性和动态边界，不复用历史分数。当前完整
 契约只覆盖城市绿色物流事实稿，其他题目应保持关闭并让远程评审故障显式失败。
 
-## 9router 与 Beacon 的重试边界
+## 9router 与 Pharos 的重试边界
 
-9router 已经负责上游网络重试，Beacon 不再对普通 5xx 叠加五轮重试：
+9router 已经负责上游网络重试，Pharos 不再对普通 5xx 叠加五轮重试：
 
 - `fetch connect timeout` 即使外层状态码为 502，也按连接超时处理，不自动重试；
-- 普通连接错误和 5xx 在 Beacon 内最多进行一次快速补偿；
+- 普通连接错误和 5xx 在 Pharos 内最多进行一次快速补偿；
 - 单次调用和全部重试共享总 deadline；
 - JSON/schema 修复使用独立次数，但仍共享同一个总 deadline；
 - 失败后异常向上抛给 LangGraph，由 checkpoint/recover 接管。
@@ -144,7 +144,7 @@ checkpoint。新运行不得依赖该脚本，它也不会改写旧 checkpoint �
 3. 代码执行期间崩溃后，复用已经 checkpoint 的模型代码响应；
 4. 敏感性解释失败后，不重复计划、代码生成和数值执行；
 5. 第二张图片失败后，不重复第一张图片的 critic 和 analysis；
-6. 9router 的 `fetch connect timeout` 不会触发 Beacon 的 5xx 重试放大。
+6. 9router 的 `fetch connect timeout` 不会触发 Pharos 的 5xx 重试放大。
 7. embedding timeout 会终止 worker，下一次请求由新 worker 完成；
 8. supervisor 在 worker 被杀后自动 recover，同一节点三次失败后停止；
 9. finalizer 只通过原子文件提交完成状态，半写入文件不会被认作完成；

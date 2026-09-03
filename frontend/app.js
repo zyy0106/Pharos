@@ -866,7 +866,7 @@ let onboardingData = {
 };
 
 const onboardingSteps = [
-  { title: "检查运行环境", subtitle: "确认 automcm-pro 所需工具已经就绪" },
+  { title: "检查运行环境", subtitle: "确认 Pharos 所需工具已经就绪" },
   { title: "选择模型服务", subtitle: "选择你正在使用的 LLM 提供商" },
   { title: "连接模型服务", subtitle: "填写访问端点与 API 密钥" },
   { title: "验证模型连接", subtitle: "确认所选模型可以正常响应" },

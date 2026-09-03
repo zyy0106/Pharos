@@ -103,7 +103,7 @@ def _to_litellm_kwargs(req: dict) -> dict:
         "model": req["model"],
         "messages": req["messages"],
         "temperature": req.get("temperature", 0.3),
-        # §6.3：Beacon 是唯一重试编排者，关闭 LiteLLM client 内部重试
+        # §6.3：Pharos 是唯一重试编排者，关闭 LiteLLM client 内部重试
         "num_retries": 0,
     }
     if req.get("response_format"):

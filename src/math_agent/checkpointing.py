@@ -1,4 +1,4 @@
-"""Beacon checkpoint saver 工厂：显式登记可反序列化的状态类型。"""
+"""Pharos checkpoint saver 工厂：显式登记可反序列化的状态类型。"""
 from __future__ import annotations
 
 import inspect

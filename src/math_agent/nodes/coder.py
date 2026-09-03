@@ -1740,11 +1740,11 @@ plt.close(fig)
     )
     wrapper = f'''# BEACON_GREEN_LOGISTICS_DUAL_SCENARIO
 import os as _beacon_os
-from pathlib import Path as _BeaconPath
+from pathlib import Path as _PharosPath
 
-_beacon_q1_dir = _BeaconPath("q1_no_policy_artifacts")
+_beacon_q1_dir = _PharosPath("q1_no_policy_artifacts")
 _beacon_q1_dir.mkdir(parents=True, exist_ok=True)
-_beacon_previous_cwd = _BeaconPath.cwd()
+_beacon_previous_cwd = _PharosPath.cwd()
 print("SCENARIO_BEGIN: q1_no_policy")
 try:
     _beacon_os.chdir(_beacon_q1_dir)

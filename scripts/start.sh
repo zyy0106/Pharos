@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 echo "============================================"
-echo "  automcm-pro — 一键启动 (Unix/macOS)"
+echo "  Pharos — 一键启动 (Unix/macOS)"
 echo "============================================"
 echo ""
 

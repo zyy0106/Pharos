@@ -430,7 +430,7 @@ def run_process_supervisor(
             supervised=not (persistent_recover_failures and mode == "recover"),
         )
 
-    with RunLock(out, filename=".beacon-supervisor.lock"):
+    with RunLock(out, filename=".pharos-supervisor.lock"):
         previous_attempts = 0
         previous_recoveries = 0
         active_policy = policy

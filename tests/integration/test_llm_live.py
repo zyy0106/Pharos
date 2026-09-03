@@ -44,7 +44,7 @@ def test_live_basic_completion():
 
 
 def test_live_structured_completion():
-    """真实 router：候选模型必须能返回 Beacon 所需的结构化 JSON。"""
+    """真实 router：候选模型必须能返回 Pharos 所需的结构化 JSON。"""
     from pydantic import BaseModel
     from math_agent.llm import complete
 
