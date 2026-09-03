@@ -1,11 +1,4 @@
 <p align="center">
-  <strong>Pharos</strong>
-</p>
-
-<h1 align="center">Pharos</h1>
-<h3 align="center">Lighting the path for every math modeling student.</h3>
-
-<p align="center">
   <a href="#quick-start"><strong>Quick Start</strong></a> ·
   <a href="#how-it-works"><strong>How It Works</strong></a> ·
   <a href="#web-ui"><strong>Web UI</strong></a> ·
@@ -347,51 +340,6 @@ npm run dev
 uv run --extra dev pytest -q
 npm test
 ```
-
----
-
-## FAQ
-
-<details>
-<summary><strong>What contests does Pharos support?</strong></summary>
-
-Pharos is designed for MCM/ICM and GMCM (中国研究生数学建模竞赛). The default template targets standard English-language papers. The `--template gmcm` flag enables the `gmcmthesis` document class with Chinese-language support, school/team/member fields, and the required cover page format.
-</details>
-
-<details>
-<summary><strong>Can I use any LLM provider?</strong></summary>
-
-Yes. Pharos uses LiteLLM under the hood, which supports 100+ providers. Any OpenAI-compatible endpoint works. Configure `OPENAI_API_BASE` and `OPENAI_API_KEY` in `.env`. Model names use the `provider/model` format (e.g., `openai/gpt-4o`, `ollama/llama3`).
-</details>
-
-<details>
-<summary><strong>What happens if the LLM returns poorly formatted JSON?</strong></summary>
-
-Pharos's `complete()` function applies multiple repair strategies: stripping thinking tags (`<think>` blocks), extracting JSON from markdown code fences, escaping illegal backslash sequences in LaTeX math, and retrying with the previous response + error as context. If all retries exhaust, a typed `LLMError` is raised with a saved checkpoint so you can resume.
-</details>
-
-<details>
-<summary><strong>How do I resume after a crash?</strong></summary>
-
-```bash
-# For crashes before human_review
-uv run math-agent recover --out runs/your-run
-
-# For crashes at human_review (you need to inject a decision)
-uv run math-agent resume --out runs/your-run --approve --notes "approved"
-
-# 也可以显式拒绝，流程将保留中间产物并停止
-uv run math-agent resume --out runs/your-run --no-approve --notes "reject"
-```
-
-The `recover` command restarts from the last saved LangGraph checkpoint. The `resume` command does the same but also injects a human approval decision.
-</details>
-
-<details>
-<summary><strong>Do I need XeLaTeX installed?</strong></summary>
-
-XeLaTeX produces the highest-quality PDF output. If it is unavailable, Pharos preserves `paper.md` and `paper.tex`, but the finalizer reports the run as `degraded`; only a successfully compiled and verified PDF can produce an unqualified `completed` result.
-</details>
 
 ## License
 
