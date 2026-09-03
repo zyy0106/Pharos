@@ -393,21 +393,6 @@ The `recover` command restarts from the last saved LangGraph checkpoint. The `re
 XeLaTeX produces the highest-quality PDF output. If it is unavailable, Pharos preserves `paper.md` and `paper.tex`, but the finalizer reports the run as `degraded`; only a successfully compiled and verified PDF can produce an unqualified `completed` result.
 </details>
 
----
-
-## Community
-
-<p align="center">
-  <strong>Pharos 技术交流群</strong><br />
-  <sub>QQ 扫码加入，交流数学建模、论文写作与 Agent 技术</sub>
-</p>
-
-<p align="center">
-  <img src="frontend/assets/qq-group-qrcode.jpg" alt="Pharos QQ Group" width="240" />
-</p>
-
----
-
 ## License
 
 MIT © 2026
