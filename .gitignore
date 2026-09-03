@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+
+# Node
+node_modules/
+# package-lock.json is intentionally committed for reproducible npm ci installs.
+
+# Environment
+.env
+
+# Runtime outputs (never commit user data, API responses, or generated artifacts)
+runs/
+runsdemo_run9/
+analysis_pdf/
+
+# Optional corpus (large or user-provided papers; the default pipeline does not require it)
+corpus/papers/
+corpus/models/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tooling / temp files
+artifact-temp/
+.superpowers/
+.zcode/
+tmp/
+tmp-tectonic-*/
+nul
+*preview_diff*
+*.log
+test.png
+*.err.log
+*.out.log

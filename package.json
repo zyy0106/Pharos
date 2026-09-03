@@ -1,0 +1,19 @@
+{
+  "name": "automcm-pro",
+  "version": "0.1.0",
+  "description": "Multi-agent system for math modeling competition papers — with Web UI",
+  "private": true,
+  "scripts": {
+    "start": "node frontend/server.mjs",
+    "start:framework": "node framework/start.mjs",
+    "dev": "node --watch frontend/server.mjs",
+    "test": "node --test frontend/app.test.mjs frontend/server.test.mjs",
+    "test:framework": "node --test framework/server.test.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,52 @@
+# {{ problem }}
+
+## 摘要
+{{ paper.abstract }}
+
+## 1. 问题重述
+{{ paper.problem_restatement }}
+
+## 2. 模型假设
+{{ paper.assumptions }}
+
+## 3. 符号说明
+{{ paper.notation }}
+
+## 4. 模型的建立
+{{ paper.model_section }}
+
+## 5. 模型的求解与实验
+{{ paper.solution }}
+
+## 6. 敏感性分析
+{{ paper.sensitivity }}
+{% for r in sensitivity_runs %}
+### {{ r.parameter }}
+{{ r.interpretation }}
+{% endfor %}
+
+## 7. 模型评价与结论
+{{ paper.conclusion }}
+
+## 参考文献
+{{ paper.references }}
+
+---
+
+## 附录 A. 关键算法代码
+{% for a in code_artifacts %}
+{% if a.success %}
+### A.{{ loop.index }} {{ a.purpose }}
+
+```python
+{{ a.curated_code }}
+```
+
+{% if a.curated_stdout %}
+**主要计算结果**：
+```
+{{ a.curated_stdout }}
+```
+{% endif %}
+{% endif %}
+{% endfor %}

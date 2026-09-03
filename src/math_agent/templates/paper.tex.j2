@@ -1,0 +1,93 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{xeCJK}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{tabularx}       % latex.py _md_table_to_latex 生成 tabularx 环境
+\usepackage{longtable}      % 超过一页的长表自动分页并重复表头
+\usepackage{booktabs}       % \toprule / \midrule / \bottomrule
+\usepackage{array}
+\usepackage{float}          % 提供 [H]：钉死图片位置，避免最后一张图独占一空页
+\usepackage[section]{placeins} % 图表不跨越其所支撑的正文大节
+\usepackage{listings}       % 附录代码块 \begin{lstlisting}
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=false,
+  keepspaces=true,
+  showstringspaces=false
+}
+\geometry{margin=2.5cm}
+\setlength{\emergencystretch}{2em}
+\setCJKmainfont{SimSun}            % 系统无 SimSun 时编译失败回退到 Markdown
+\renewcommand{\abstractname}{摘要}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\title{ {{- problem -}} }
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+{{ paper.abstract }}
+\end{abstract}
+\noindent\textbf{关键词：} {{ paper.keywords }}
+
+\section{问题重述}
+{{ paper.problem_restatement }}
+
+\section{模型假设}
+{{ paper.assumptions }}
+
+\section{符号说明}
+{{ paper.notation }}
+
+\section{模型的建立}
+{{ paper.model_section }}
+
+\section{模型的求解与实验}
+{{ paper.solution }}
+
+\section{敏感性分析}
+{{ paper.sensitivity }}
+
+{% for r in sensitivity_runs %}
+{% if r.interpretation %}
+\subsubsection*{ {{- r.parameter -}} }
+{{ r.interpretation }}
+
+{% endif %}
+{% endfor %}
+
+\section{模型评价与结论}
+{{ paper.conclusion }}
+
+\section*{参考文献}
+{{ paper.references }}
+
+{% if code_artifacts %}
+\appendix
+\section{ {{- appendix_title -}} }
+{% for art in code_artifacts %}
+{% if art.success %}
+\subsection{ {{- art.purpose -}} }
+{% if art.curated_code %}
+\begin{lstlisting}[language=Python]
+{{ art.curated_code }}
+\end{lstlisting}
+{% endif %}
+
+{% if art.curated_stdout %}
+\subsubsection*{主要计算结果}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,breaklines=true,breakatwhitespace=false,columns=fullflexible]
+{{ art.curated_stdout }}
+\end{lstlisting}
+{% endif %}
+
+{% endif %}
+{% endfor %}
+{% endif %}
+
+\end{document}

@@ -1,0 +1,439 @@
+"""table_assembler 单元测试：禁用词清洗 + 表格生成。"""
+from math_agent.nodes.table_assembler import _clean_forbidden_words, _find_internal_terms
+
+
+def test_clean_replaces_papercritic():
+    text = "本文 PaperCritic 评分较高"
+    cleaned, warnings = _clean_forbidden_words(text, "model_section")
+    assert "PaperCritic" not in cleaned
+    assert "论文评审" in cleaned
+    assert len(warnings) == 1
+
+
+def test_clean_replaces_claim_evidence_reasoning():
+    # M3 fix: Claim/Evidence/Reasoning 只在中文上下文替换
+    text = "结论是Claim: 成本下降。依据是Evidence: 代码输出。推理是Reasoning: 优化有效。"
+    cleaned, warnings = _clean_forbidden_words(text, "solution")
+    assert "Claim" not in cleaned
+    assert "结论" in cleaned
+    assert "依据" in cleaned
+    assert "推理" in cleaned
+    assert len(warnings) >= 3
+
+
+def test_clean_preserves_english_claim_evidence():
+    """M3: 纯英文段落里的 Claim/Evidence 不应被替换。"""
+    text = "Based on the evidence, we conclude that the claim is valid."
+    cleaned, warnings = _clean_forbidden_words(text, "abstract")
+    assert "evidence" in cleaned.lower()
+    assert "claim" in cleaned.lower()
+
+
+def test_clean_replaces_code_number():
+    # M4 fix: 只匹配代码[N] 方括号形式，不匹配代码N 裸数字形式
+    text = "见代码[2]的输出"
+    cleaned, warnings = _clean_forbidden_words(text, "solution")
+    assert "代码[2]" not in cleaned
+    assert "代码" in cleaned
+
+
+def test_clean_preserves_code_with_quantity():
+    """M4: '代码 45 行' 不应被吃掉数字。"""
+    text = "代码 45 行的运行时间"
+    cleaned, warnings = _clean_forbidden_words(text, "solution")
+    assert "45" in cleaned
+
+
+def test_clean_replaces_placeholder_names():
+    text = "队员李华和张三、王五参与"
+    cleaned, warnings = _clean_forbidden_words(text, "conclusion")
+    assert "李华" not in cleaned
+    assert "张三" not in cleaned
+    assert "王五" not in cleaned
+    assert "队员A" in cleaned
+
+
+def test_clean_replaces_timeout_and_placeholder():
+    text = "代码超时，结果为占位"
+    cleaned, warnings = _clean_forbidden_words(text, "solution")
+    assert "超时" not in cleaned
+    assert "占位" not in cleaned
+
+
+def test_clean_preserves_clean_text():
+    text = "本文建立了一个混合整数规划模型，求解得到最优成本 1245.3。"
+    cleaned, warnings = _clean_forbidden_words(text, "model_section")
+    assert cleaned == text
+    assert warnings == []
+
+
+def test_clean_rewrites_runtime_internal_terms_as_competition_paper_language():
+    text = (
+        "正式主方案通过 RESULT 门禁，图来自 primary artifact，数值可回溯到 stdout；"
+        "checkpoint 中的 SensitivityRun 不混入历史 attempt。"
+    )
+
+    cleaned, warnings = _clean_forbidden_words(text, "solution")
+
+    assert _find_internal_terms(cleaned) == []
+    assert "本文方案" in cleaned
+    assert "计算结果" in cleaned
+    assert "有效性检查" in cleaned
+    assert "原始数值输出" in cleaned
+    assert "敏感性实验记录" in cleaned
+    assert warnings
+
+
+def test_find_internal_terms_reports_unresolved_protocol_labels():
+    leaked = _find_internal_terms("正文仍含 checkpoint、stdout 和 RESULT 门禁。")
+    assert {"checkpoint", "stdout", "RESULT", "门禁"}.issubset(set(leaked))
+
+
+def test_clean_handles_empty_string():
+    cleaned, warnings = _clean_forbidden_words("", "abstract")
+    assert cleaned == ""
+    assert warnings == []
+
+
+from math_agent.nodes.table_assembler import _generate_variable_table
+
+
+def test_variable_table_basic():
+    variables = {"x_i": "决策变量，第i个时段的调度量", "d_i": "需求量(件)", "alpha": "学习率"}
+    table = _generate_variable_table(variables)
+    assert "| 符号 | 含义 | 单位 |" in table
+    assert "|---|---|---|" in table
+    assert r"x\_i" in table  # 下划线被 LaTeX 转义
+    assert "决策变量，第i个时段的调度量" in table
+    assert "件" in table          # 从 "需求量(件)" 拆出单位
+    assert "—" in table           # alpha 无单位 → 填 —
+
+
+def test_variable_table_empty():
+    table = _generate_variable_table({})
+    assert table == ""
+
+
+def test_variable_table_no_unit_in_parens():
+    variables = {"s": "存量"}
+    table = _generate_variable_table({"s": "存量"})
+    lines = table.strip().split("\n")
+    # 表头 + 分隔行 + 1 数据行 = 3 行
+    assert len(lines) == 3
+    assert "—" in lines[2]        # 无单位
+
+
+from math_agent.state import SensitivityRun
+from math_agent.nodes.table_assembler import _generate_sensitivity_table
+
+
+def test_sensitivity_table_basic():
+    runs = [
+        SensitivityRun(parameter="alpha", values=[0.1, 0.5, 1.0],
+                       metric="MAE", results=[10.0, 20.0, 30.0]),
+    ]
+    table = _generate_sensitivity_table(runs)
+    assert "| 参数 | 取值范围 | 指标 | 指标变化范围 | 敏感性评级 |" in table
+    assert "alpha" in table
+    assert "MAE" in table
+    assert "高" in table          # (30-10)/20 = 100% > 30% → 高
+
+
+def test_sensitivity_table_medium_rating():
+    runs = [
+        SensitivityRun(parameter="beta", values=[1, 2, 3],
+                       metric="cost", results=[100.0, 115.0, 108.0]),
+    ]
+    table = _generate_sensitivity_table(runs)
+    # (115-100)/107.67 ≈ 13.9% → 中
+    assert "中" in table
+
+
+def test_sensitivity_table_low_rating():
+    runs = [
+        SensitivityRun(parameter="gamma", values=[1, 2, 3],
+                       metric="rate", results=[0.90, 0.91, 0.905]),
+    ]
+    table = _generate_sensitivity_table(runs)
+    # (0.91-0.90)/0.905 ≈ 1.1% → 低
+    assert "低" in table
+
+
+def test_sensitivity_table_empty():
+    table = _generate_sensitivity_table([])
+    assert table == ""
+
+
+def test_sensitivity_table_uses_latest_run_per_parameter():
+    runs = [
+        SensitivityRun(parameter="speed", values=[0.8, 1.0, 1.2],
+                       metric="cost", results=[240000, 245000, 250000]),
+        SensitivityRun(parameter="speed", values=[0.8, 1.0, 1.2],
+                       metric="cost", results=[146017.04, 144586.99, 145204.85]),
+    ]
+
+    table = _generate_sensitivity_table(runs)
+
+    assert table.count("| speed |") == 1
+    assert "1.446e+05" in table
+    assert "2.4e+05" not in table
+
+
+def test_sensitivity_table_decodes_interaction_parameter_for_readers():
+    run = SensitivityRun(
+        parameter="速度比例×限行开始时刻二维组合编码",
+        values=[8007, 8008, 8009, 10007, 10008, 10009, 12007, 12008, 12009],
+        metric="Z",
+        results=[
+            94541.15, 92673.57, 92817.31,
+            92704.02, 91544.49, 91425.33,
+            92301.92, 91006.45, 90933.57,
+        ],
+    )
+
+    table = _generate_sensitivity_table([run])
+
+    assert "速度比例与限行开始时刻（3×3全因子）" in table
+    assert "速度0.8–1.2；开始时刻7–9时" in table
+    assert "8007" not in table
+    assert "12009" not in table
+
+
+from math_agent.nodes.table_assembler import _inject_table
+
+
+def test_inject_table_appends_when_absent():
+    text = "这是原有内容。"
+    table = "| A | B |\n|---|---|\n| 1 | 2 |"
+    result = _inject_table(text, "参数表", table)
+    assert "## 参数表" in result
+    assert "这是原有内容。" in result
+    assert "| A | B |" in result
+
+
+def test_inject_table_can_skip_when_already_present():
+    text = "原有内容。\n\n## 参数表\n\n已有表格"
+    table = "| A | B |\n|---|---|\n| 1 | 2 |"
+    result = _inject_table(text, "参数表", table, replace_existing=False)
+    # 不重复注入
+    assert result.count("## 参数表") == 1
+    assert "| A | B |" not in result
+
+
+def test_inject_table_refreshes_existing_generated_table():
+    text = "正文。\n\n## 参数表\n\n| A | B |\n|---|---|\n| old | old |\n"
+    table = "| A | B |\n|---|---|\n| current | current |"
+
+    result = _inject_table(text, "参数表", table)
+
+    assert "old" not in result
+    assert result.count("## 参数表") == 1
+    assert "current" in result
+
+
+def test_inject_table_empty_table_returns_unchanged():
+    text = "原有内容。"
+    result = _inject_table(text, "参数表", "")
+    assert result == text
+
+
+from math_agent.state import MathModelingState, ModelVersion, PaperSections, SensitivityRun
+from math_agent.nodes.table_assembler import table_assembler_node
+
+
+def _state_for_assembler():
+    s = MathModelingState(problem="test")
+    s.model_versions.append(ModelVersion(
+        stage="final",
+        description="final model",
+        variables={"x_i": "调度量(件)", "d_i": "需求量", "alpha": "学习率"},
+    ))
+    s.sensitivity_runs.append(SensitivityRun(
+        parameter="alpha", values=[0.1, 0.5, 1.0],
+        metric="MAE", results=[10.0, 20.0, 30.0],
+    ))
+    s.paper = PaperSections(
+        model_section="基础预测模型：使用 XGBoost。PaperCritic 给了好评。",
+        notation="原有符号表",
+        sensitivity="敏感性分析正文",
+        solution="求解过程见代码[1]。Claim是最优。",
+        conclusion="模型优点多。",
+    )
+    return s
+
+
+def test_table_assembler_node_injects_variable_table():
+    s = _state_for_assembler()
+    result = table_assembler_node(s)
+    new_paper = result["paper"]
+    assert "| 符号 | 含义 | 单位 |" in new_paper.notation
+    assert r"x\_i" in new_paper.notation  # 下划线被 LaTeX 转义
+
+
+def test_table_assembler_node_injects_sensitivity_table():
+    s = _state_for_assembler()
+    result = table_assembler_node(s)
+    new_paper = result["paper"]
+    assert "| 参数 | 取值范围 |" in new_paper.sensitivity
+    assert "alpha" in new_paper.sensitivity
+
+
+def test_table_assembler_node_cleans_forbidden_words():
+    s = _state_for_assembler()
+    result = table_assembler_node(s)
+    new_paper = result["paper"]
+    assert "PaperCritic" not in new_paper.model_section
+    assert "Claim" not in new_paper.solution
+    assert "代码1" not in new_paper.solution
+    assert len(result["table_warnings"]) >= 3
+
+
+def test_table_assembler_node_handles_empty_state():
+    s = MathModelingState(problem="empty")
+    s.paper = PaperSections()
+    result = table_assembler_node(s)
+    # 不崩，warnings 可能为空
+    assert "paper" in result
+    assert "table_warnings" in result
+
+
+def test_references_section_not_cleaned():
+    """references 含真实英文文献标题，不应被禁用词清洗破坏。"""
+    from math_agent.nodes.table_assembler import _SECTION_FIELDS
+    assert "references" not in _SECTION_FIELDS
+
+    # 直接测试：含 Evidence/Issue 的参考文献文本应原样保留
+    from math_agent.nodes.table_assembler import table_assembler_node
+    from math_agent.state import MathModelingState, PaperSections
+    s = MathModelingState(problem="test")
+    s.paper = PaperSections(
+        references="[1] Smith J. Evidence-Based Optimization. Journal of Math, Issue 12, 2023."
+    )
+    result = table_assembler_node(s)
+    assert "Evidence" in result["paper"].references
+    assert "Issue" in result["paper"].references
+
+
+from math_agent.nodes.table_assembler import _generate_comparison_table
+from math_agent.state import CodeArtifact
+
+
+def test_comparison_table_from_baselines():
+    artifacts = [
+        CodeArtifact(
+            purpose="无调度对照", code="", success=True,
+            stdout="RESULT: baseline=no_schedule total_cost=1245.3 service_rate=0.82",
+            category="baseline:no_schedule",
+        ),
+        CodeArtifact(
+            purpose="贪婪对照", code="", success=True,
+            stdout="RESULT: baseline=greedy total_cost=980.0 service_rate=0.91",
+            category="baseline:greedy",
+        ),
+        CodeArtifact(
+            purpose="主方案", code="", success=True,
+            stdout=(
+                "SCENARIO_Q1: baseline=no_policy total_cost=710.2 vehicles=6 "
+                "fuel_vehicles=5 ev_vehicles=1 total_carbon=80.0 timewin_rate=0.96\n"
+                "RESULT: baseline=ours total_cost=750.5 service_rate=0.95"
+            ),
+            category="figure",
+        ),
+    ]
+    table = _generate_comparison_table(artifacts)
+    assert "| 方案 |" in table
+    assert "无邻域与发车优化" in table
+    assert "Q1无政策方案" in table
+    assert "710.2" in table
+    assert "1245.3" in table
+    assert "980.0" in table
+    assert "750.5" in table
+
+
+def test_comparison_table_empty_when_no_baselines():
+    artifacts = [
+        CodeArtifact(purpose="main", code="", success=True, stdout="", category="figure"),
+    ]
+    table = _generate_comparison_table(artifacts)
+    assert table == ""
+
+
+def test_comparison_table_omits_failed_baselines():
+    artifacts = [
+        CodeArtifact(
+            purpose="无调度对照", code="", success=False,
+            stdout="", stderr="error", category="baseline:no_schedule",
+        ),
+        CodeArtifact(
+            purpose="贪婪对照", code="", success=True,
+            stdout="RESULT: baseline=greedy total_cost=980.0",
+            category="baseline:greedy",
+        ),
+    ]
+    table = _generate_comparison_table(artifacts)
+    assert "无邻域与发车优化" not in table
+    assert "运行失败" not in table
+    assert "980.0" in table
+
+
+def test_comparison_table_omits_semantically_invalid_success():
+    artifacts = [
+        CodeArtifact(
+            purpose="异常主方案", code="", success=True,
+            stdout="RESULT: baseline=ours total_cost=4812127.99 veh_count=19011 service_rate=0.92",
+        ),
+        CodeArtifact(
+            purpose="有效基线", code="", success=True,
+            stdout="RESULT: baseline=greedy total_cost=980.0 vehicles=7 service_rate=0.91",
+            category="baseline:greedy",
+        ),
+    ]
+
+    table = _generate_comparison_table(artifacts, max_entity_count=2170)
+
+    assert "4812127.99" not in table
+    assert "980.0" in table
+
+
+def test_table_assembler_node_injects_comparison_table():
+    """table_assembler 应把对比表注入 paper.solution。"""
+    from math_agent.state import MathModelingState, ModelVersion, PaperSections, CodeArtifact
+    s = MathModelingState(problem="test")
+    s.model_versions.append(ModelVersion(
+        stage="final", description="m", variables={"x": "v"},
+    ))
+    s.code_artifacts = [
+        CodeArtifact(
+            purpose="无调度", code="", success=True,
+            stdout="RESULT: baseline=no_schedule total_cost=1245.3 service_rate=0.82",
+            category="baseline:no_schedule",
+        ),
+        CodeArtifact(
+            purpose="贪婪", code="", success=True,
+            stdout="RESULT: baseline=greedy total_cost=980.0 service_rate=0.91",
+            category="baseline:greedy",
+        ),
+    ]
+    s.paper = PaperSections(solution="## 求解算法与流程\n求解过程。")
+    result = table_assembler_node(s)
+    assert "| 方案 |" in result["paper"].solution
+    assert "无邻域与发车优化" in result["paper"].solution
+
+
+def test_table_assembler_ignores_old_coder_batches():
+    from math_agent.state import MathModelingState, PaperSections, CodeArtifact
+    state = MathModelingState(problem="test", paper=PaperSections(solution="结果"))
+    state.code_artifacts = [
+        CodeArtifact(
+            purpose="old", code="", success=True, batch=1,
+            stdout="RESULT: baseline=old cost=999", category="baseline:old",
+        ),
+        CodeArtifact(
+            purpose="new", code="", success=True, batch=2,
+            stdout="RESULT: baseline=ours cost=100", category="baseline:ours",
+        ),
+    ]
+    result = table_assembler_node(state)
+    assert "999" not in result["paper"].solution
+    assert "100.0" in result["paper"].solution
+

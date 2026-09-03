@@ -1,0 +1,123 @@
+# 章节撰写：模型的建立
+
+本轮你**只**撰写一个字段：`model_section`。其余章节由其他轮次处理，不要输出。
+
+{% include 'writer_iron_rules.md.j2' %}
+
+---
+
+## 本段大纲锚点
+{{ outline_model_section }}
+
+---
+
+## 题目
+{{ problem }}
+
+## 已确认假设（{{ assumptions | length }} 条）
+{% for a in assumptions %}
+- {{ loop.index }}. {{ a.statement }}
+{% endfor %}
+
+## 最终模型与必要推导
+{% for m in model_versions %}
+{% if loop.last %}
+{{ m.description }}
+
+**方程**：
+{% for eq in m.equations %}
+- \[ {{ eq }} \]
+{% endfor %}
+
+**变量**：
+{% for k, v in m.variables.items() %}
+- `{{ k }}`：{{ v }}
+{% endfor %}
+
+{% if m.derivation_steps %}
+**推导链**：
+{% for d in m.derivation_steps %}
+- **{{ d.title[:100] }}**
+  - 动机：{{ d.motivation[:100] }}
+  - 陈述：{{ d.statement[:100] }}
+  - 结果：{{ d.result[:100] }}
+{% endfor %}
+{% endif %}
+
+{% if m.notes %}**实现边界**：{{ m.notes }}{% endif %}
+{% endif %}
+{% endfor %}
+
+---
+
+{% if prior_critic %}
+## 上一轮 PaperCritic 反馈（必须逐条回应）
+
+PaperCritic 评分：{{ prior_critic.score }}/10，approved={{ prior_critic.approved }}。
+
+**issues**（仅与本段相关，其余可忽略）：
+{% for i in prior_critic.issues %}
+- [{{ i.section }}] {{ i.problem }}
+{% endfor %}
+
+本次重写时**必须**逐条回应上述与本段相关的 issues；不能简单复述上一稿。
+{% endif %}
+
+---
+
+## 正式主方案代码（模型叙述必须与此实现一致）
+{% for a in code_artifacts %}
+{% if a.evidence_role == "primary" %}
+```python
+{{ a.code }}
+```
+{% endif %}
+{% endfor %}
+
+## 字段字数预算与结构要求
+
+| 字段 | 字数区间 | 强制结构 |
+|---|---|---|
+| `model_section` | 2500–4500 | 按赛题小问组织最终模型，不展示 basic→improved→final 的研发过程。每个小问包含建模动机、变量、目标/约束、求解接口和回答指标，用 `##` 标题分隔。 |
+
+### 推荐结构（用 `##` 标题）
+
+**## 问题一：静态绿色配送优化模型**
+- 完整写出五项成本目标函数，不得只写速度或能耗子式
+- 定义路径、车辆启用、车型、到达/服务时间、载重与容积变量
+- 按客户覆盖、流守恒、配送中心起讫、载重、容积、车辆上限、软时间窗和时变行驶时间逐组给出约束
+- 本题没有经代码验证的机器学习预测器；禁止编造 XGBoost、STGNN、遗传算法、ALNS 或动态规划
+
+**## 问题二：绿色配送区政策扩展**
+- 附件坐标字段为 `X (km), Y (km)`，必须使用欧氏距离；禁止写 Haversine 经纬度距离
+- 说明半径10 km绿色区、8:00–16:00燃油车禁入、线段与圆边界相交判定
+- 区分硬约束、软时间窗惩罚与评价指标，说明求解实现中的逐候选可行性检查
+- 明确该模型含速度依赖非线性能耗，程序采用构造式启发式求可行解，不宣称精确最优性
+
+**## 问题三：动态事件与局部调整**
+- 只描述正式代码真实执行的事件类型与调整算子
+- 给出冻结边界、受影响任务、候选邻域、可行性检查、目标增量和升级策略
+- `response_time` 是 Python `time.time()` 的秒数；不得改写成分钟或小时
+- 不得声称代码未实现的滚动时域、CVaR、场景树或四类事件均已数值验证
+
+每段首句说明该模型如何回答对应小问。删去与赛题回答无关的工程审计、恢复流程和开发版本说明。若题目不是三问结构，按 Blueprint 的实际小问重组，禁止套用本题标题。
+
+{% if retrieved_context %}
+
+---
+
+## 检索到的参考资料（仅供启发，不可照抄）
+{{ retrieved_context }}
+{% endif %}
+
+---
+
+## 输出契约
+
+请返回严格符合下列 schema 的 JSON（**不得包含其他键**）：
+
+```json
+{
+  "model_section": str
+}
+```

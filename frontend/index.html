@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>automcm-pro 数学建模工作台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="项目导航">
+        <a class="brand" href="#workspace" aria-label="automcm-pro 工作台">
+          <span class="brand-mark" aria-hidden="true">A</span>
+          <span>
+            <strong>automcm-pro</strong>
+            <small>Math Modeling Workflow</small>
+          </span>
+        </a>
+
+        <nav class="nav-list" aria-label="主要页面">
+          <a class="active" href="#workspace">工作台</a>
+          <a href="#pipeline">流水线</a>
+          <a href="#outputs">产物</a>
+          <a href="#knowledge">知识库</a>
+          <a href="#settings">设置</a>
+        </nav>
+
+        <section class="sidebar-panel">
+          <p class="eyebrow">当前模板</p>
+          <div class="template-switch" role="tablist" aria-label="论文模板">
+            <button class="active" type="button" data-template="default">Default</button>
+            <button type="button" data-template="gmcm">GMCM</button>
+          </div>
+          <p class="hint" id="templateHint">适配建模论文、代码、敏感性分析与 LaTeX 编译流程。</p>
+        </section>
+      </aside>
+
+      <main class="workspace" id="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">从赛题到论文</p>
+            <h1>三步开始你的数学建模任务</h1>
+            <p class="topbar-lead">导入赛题、补全内容，然后让 automcm-pro 自动完成建模、实验与论文生成。</p>
+          </div>
+        </header>
+
+        <section class="start-guide" id="startGuide" aria-labelledby="start-guide-title">
+          <div class="start-guide-heading">
+            <div>
+              <p class="eyebrow">Quick Start</p>
+              <h2 id="start-guide-title" tabindex="-1">从这里开始</h2>
+            </div>
+            <span class="readiness-badge" id="readinessBadge" role="status" aria-live="polite">等待导入赛题</span>
+          </div>
+          <div class="start-guide-grid">
+            <article class="start-step active" id="importStep">
+              <span class="start-step-number" aria-hidden="true">1</span>
+              <div>
+                <h3>导入赛题</h3>
+                <p>上传自己的题面，或先用示例体验完整流程。</p>
+                <div class="start-step-actions">
+                  <button class="primary-button" type="button" id="chooseProblem">上传我的题目</button>
+                  <button class="ghost-button" type="button" id="importDemo">使用示例体验</button>
+                </div>
+              </div>
+            </article>
+            <article class="start-step" id="reviewStep">
+              <span class="start-step-number" aria-hidden="true">2</span>
+              <div>
+                <h3>补全题目内容</h3>
+                <p id="reviewStepHint">导入后检查标题、任务目标和数据附件。</p>
+                <a class="step-link" href="#task-title">前往检查</a>
+              </div>
+            </article>
+            <article class="start-step" id="runStep">
+              <span class="start-step-number" aria-hidden="true">3</span>
+              <div>
+                <h3>开始生成</h3>
+                <p id="runStepHint">准备好后，一键启动完整建模流水线。</p>
+                <button class="primary-button" type="button" id="runPipeline" disabled>开始生成论文</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="status-strip" aria-label="运行概览">
+          <article>
+            <span>当前阶段</span>
+            <strong id="currentStage">Ready</strong>
+          </article>
+          <article>
+            <span>节点进度</span>
+            <strong id="nodeProgress">0 / 14</strong>
+          </article>
+          <article>
+            <span>质量评分</span>
+            <strong id="qualityScore">--</strong>
+          </article>
+          <article>
+            <span>输出目录</span>
+            <strong id="outputSummary">runs/ui-latest</strong>
+          </article>
+        </section>
+
+        <div class="layout-grid">
+          <section class="panel task-panel" aria-labelledby="task-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Problem Brief</p>
+                <h2 id="task-title">检查赛题</h2>
+              </div>
+              <span class="badge" id="problemBadge">未导入</span>
+            </div>
+            <p class="panel-intro">标题与目标会直接影响建模方向。你可以在导入后继续修改，automcm-pro 会以这里的内容为准。</p>
+
+            <label class="field">
+              <span>赛题标题</span>
+              <input id="problemTitle" placeholder="例如：城市应急物资调度优化" />
+            </label>
+
+            <label class="field">
+              <span>背景与目标</span>
+              <textarea id="problemBrief" rows="8" placeholder="粘贴赛题背景、需要解决的问题与输出要求，或直接上传题面文件。"></textarea>
+            </label>
+
+            <input class="visually-hidden" id="problemFile" type="file" accept=".json,.md,.txt,.pdf,.docx" />
+            <div class="upload-zone" tabindex="0" role="button" aria-label="上传题目 JSON、Markdown、文本、PDF 或 Word" id="uploadZone">
+              <div class="upload-icon">+</div>
+              <div>
+                <strong id="uploadTitle">拖入题目文件</strong>
+                <span id="uploadMeta">支持 JSON、Markdown、TXT、PDF、Word 题面</span>
+              </div>
+            </div>
+
+            <input class="visually-hidden" id="attachmentFile" type="file" accept=".xlsx,.xls,.csv,.pdf,.docx,.txt,.md" multiple />
+            <div class="upload-zone attachment-zone" tabindex="0" role="button" aria-label="上传数据附件" id="attachmentZone">
+              <div class="upload-icon">📎</div>
+              <div>
+                <strong id="attachmentTitle">拖入数据附件</strong>
+                <span id="attachmentMeta">支持 Excel、CSV、PDF、Word、TXT（可多选）</span>
+              </div>
+            </div>
+            <div class="attachment-list" id="attachmentList"></div>
+
+            <details class="advanced-disclosure">
+              <summary>高级选项 <span>首次使用可保持默认</span></summary>
+              <div class="control-row">
+                <label class="toggle">
+                  <input id="ragToggle" type="checkbox" checked />
+                  <span>启用知识库辅助</span>
+                </label>
+                <label class="toggle">
+                  <input id="hitlToggle" type="checkbox" checked />
+                  <span>生成前人工确认</span>
+                </label>
+                <label class="toggle">
+                  <input id="forceToggle" type="checkbox" />
+                  <span>覆盖已有输出</span>
+                </label>
+              </div>
+            </details>
+          </section>
+
+          <section class="panel pipeline-panel" id="pipeline" aria-labelledby="pipeline-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">LangGraph Pipeline</p>
+                <h2 id="pipeline-title">建模流水线</h2>
+              </div>
+              <button class="icon-button" type="button" id="resetPipeline" aria-label="刷新流水线" title="刷新流水线">↻</button>
+            </div>
+
+            <div class="phase-overview" aria-label="流水线四个阶段">
+              <article><span>1</span><strong>理解题目</strong><small>分析目标与约束</small></article>
+              <article><span>2</span><strong>建模实验</strong><small>建模、编码与验证</small></article>
+              <article><span>3</span><strong>撰写评审</strong><small>生成并迭代论文</small></article>
+              <article><span>4</span><strong>输出交付</strong><small>审核并编译 PDF</small></article>
+            </div>
+            <details class="pipeline-disclosure">
+              <summary>查看 14 个处理节点</summary>
+              <ol class="pipeline-list" id="pipelineList">
+                <li><span>Analyst</span><small>题意拆解与 Problem Blueprint</small></li>
+                <li><span>Blueprint Critic</span><small>审查题目理解完整性</small></li>
+                <li><span>Modeler</span><small>建立基础与改进模型</small></li>
+                <li><span>Model Critic</span><small>检查假设与推导漏洞</small></li>
+                <li><span>Coder</span><small>生成可运行实验代码</small></li>
+                <li><span>Code Consistency</span><small>模型-代码一致性审查</small></li>
+                <li><span>Sensitivity</span><small>参数扫描与鲁棒性分析</small></li>
+                <li><span>Figure Pipeline</span><small>图表渲染与质量评审</small></li>
+                <li><span>Writer</span><small>分章节生成论文草稿</small></li>
+                <li><span>Paper Critic</span><small>论文质量与格式评审</small></li>
+                <li><span>Table Assembler</span><small>注入表格并清洗正文</small></li>
+                <li><span>Evaluation</span><small>综合评分与改进建议</small></li>
+                <li><span>Human Review</span><small>等待人工批准或拒绝</small></li>
+                <li><span>LaTeX</span><small>编译 PDF 并回退 Markdown</small></li>
+              </ol>
+            </details>
+          </section>
+
+          <section class="panel run-panel" aria-labelledby="run-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Run Control</p>
+                <h2 id="run-title">运行设置</h2>
+              </div>
+              <span class="live-dot" id="runState">Live</span>
+            </div>
+
+            <div class="recommended-settings">
+              <span aria-hidden="true">✓</span>
+              <div>
+                <strong>默认设置已就绪</strong>
+                <p>适合首次运行，可在需要时再调整输出目录与迭代深度。</p>
+              </div>
+            </div>
+            <details class="advanced-disclosure run-options">
+              <summary>修改高级运行参数</summary>
+              <div class="metric-stack">
+                <label class="field compact">
+                  <span>输出目录</span>
+                  <input id="outputDir" value="runs/ui-latest" />
+                </label>
+                <label class="field compact">
+                  <span>任务标识</span>
+                  <input id="threadId" value="default" />
+                </label>
+                <label class="field compact">
+                  <span>迭代深度 <b id="iterationValue">3</b></span>
+                  <input id="iterationDepth" type="range" min="1" max="5" value="3" />
+                </label>
+              </div>
+
+              <div class="command-preview" aria-label="命令预览">
+                <span>CLI</span>
+                <code id="commandPreview">math-agent run --problem problem.json --out runs/ui-latest --thread default</code>
+              </div>
+            </details>
+          </section>
+
+          <section class="panel output-panel" id="outputs" aria-labelledby="output-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Artifacts</p>
+                <h2 id="output-title">产物预览</h2>
+              </div>
+              <button class="ghost-button small" type="button" id="openOutputs">打开目录</button>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="产物类型">
+              <button class="active" type="button" data-tab="paper">论文</button>
+              <button type="button" data-tab="blueprint">Blueprint</button>
+              <button type="button" data-tab="figures">图表</button>
+              <button type="button" data-tab="trace">Trace</button>
+            </div>
+
+            <div class="artifact-preview" id="artifactPreview">
+              <h3>还没有论文产物</h3>
+              <p>完成上方三个步骤后，论文、图表和运行记录会显示在这里。</p>
+              <div class="paper-lines" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel knowledge-panel" id="knowledge" aria-labelledby="knowledge-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Knowledge Base</p>
+                <h2 id="knowledge-title">知识库</h2>
+              </div>
+              <span class="badge" id="knowledgeBadge">RAG On</span>
+            </div>
+
+            <div class="knowledge-grid">
+              <article>
+                <strong>经典模型库</strong>
+                <span>优化、回归预测、评价模型、排队论与微分方程片段。</span>
+              </article>
+              <article>
+                <strong>优秀论文语料</strong>
+                <span>按摘要、模型、实验、图表和结论分块检索。</span>
+              </article>
+              <article>
+                <strong>引用与证据</strong>
+                <span>为 Analyst、Modeler、Writer 自动注入可追溯上下文。</span>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel settings-panel" id="settings" hidden aria-labelledby="settings-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Configuration</p>
+              <h2 id="settings-title">设置</h2>
+            </div>
+          </div>
+          <div class="settings-layout">
+            <nav class="settings-nav" aria-label="设置分类">
+              <button class="active" type="button" data-settings-tab="api">API 配置</button>
+              <button type="button" data-settings-tab="models">模型选择</button>
+              <button type="button" data-settings-tab="rag">RAG 知识库</button>
+              <button type="button" data-settings-tab="advanced">高级设置</button>
+            </nav>
+            <div class="settings-content" id="settingsContent"></div>
+          </div>
+          <div class="settings-footer">
+            <button class="ghost-button" type="button" id="settingsReset">重置默认</button>
+            <button class="primary-button" type="button" id="settingsSave">💾 保存配置</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="onboarding-overlay" id="onboardingOverlay" hidden>
+      <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" aria-describedby="onboardingSubtitle">
+        <div class="onboarding-header">
+          <h2 id="onboardingTitle">欢迎使用 automcm-pro</h2>
+          <p id="onboardingSubtitle">让我们花几分钟完成初始配置</p>
+          <div class="onboarding-steps">
+            <span class="step-dot active" data-step="1"></span>
+            <span class="step-dot" data-step="2"></span>
+            <span class="step-dot" data-step="3"></span>
+            <span class="step-dot" data-step="4"></span>
+            <span class="step-dot" data-step="5"></span>
+          </div>
+        </div>
+        <div class="onboarding-body" id="onboardingBody"></div>
+        <div class="onboarding-footer">
+          <button class="ghost-button" type="button" id="onboardingPrev" disabled>上一步</button>
+          <button class="primary-button" type="button" id="onboardingNext">下一步</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
+
